@@ -389,64 +389,20 @@
                 <div class="col-lg-6">
                     <div class="bg-light-custom p-4 p-md-5 rounded-3">
                         <form action="https://formspree.io/f/xaqwoqye" method="POST">
-                            <div class="mb-3">
-                            <label for="name" class="form-label fw-bold">Nome</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="name"
-                                name="name"
-                                placeholder="Seu nome completo"
-                                required
-                            >
-                            </div>
 
-                            <div class="mb-3">
-                            <label for="email" class="form-label fw-bold">E-mail Corporativo</label>
-                            <input 
-                                type="email" 
-                                class="form-control" 
-                                id="email"
-                                name="email"
-                                placeholder="seuemail@empresa.com.br"
-                                required
-                            >
-                            </div>
+  <label>
+    Seu e-mail:
+    <input type="email" name="email" required>
+  </label>
 
-                            <div class="mb-3">
-                            <label for="phone" class="form-label fw-bold">Telefone</label>
-                            <input 
-                                type="text" 
-                                class="form-control" 
-                                id="phone"
-                                name="phone"
-                                placeholder="Seu número de telefone"
-                            >
-                            </div>
+  <label>
+    Mensagem:
+    <textarea name="message" required></textarea>
+  </label>
 
-                            <div class="mb-4">
-                            <label for="message" class="form-label fw-bold">Como podemos ajudar?</label>
-                            <textarea 
-                                class="form-control" 
-                                id="message"
-                                name="message"
-                                rows="4"
-                                placeholder="Descreva brevemente sua necessidade..."
-                                required
-                            ></textarea>
-                            </div>
+  <button type="submit">Enviar</button>
+</form>
 
-                            <!-- Opcional, mas altamente recomendado -->
-                            <input type="hidden" name="_subject" value="Novo contato via site VílaQG">
-
-                            <!-- Anti-spam simples -->
-                            <input type="text" name="_gotcha" style="display:none">
-
-                            <button type="submit" class="btn btn-vila w-100">
-                            Enviar Mensagem
-                            </button>
-
-                        </form>
                     </div>
                 </div>
             </div>
