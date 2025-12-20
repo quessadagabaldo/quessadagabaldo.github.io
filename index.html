@@ -389,20 +389,30 @@
                 <div class="col-lg-6">
                     <div class="bg-light-custom p-4 p-md-5 rounded-3">
                         <form action="https://formspree.io/f/xaqwoqye" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Nome</label>
+                                <input type="text" class="form-control" name="name" required>
+                            </div>
 
-  <label>
-    Seu e-mail:
-    <input type="email" name="email" required>
-  </label>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">E-mail</label>
+                                <input type="email" class="form-control" name="email" required>
+                            </div>
 
-  <label>
-    Mensagem:
-    <textarea name="message" required></textarea>
-  </label>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Telefone</label>
+                                <input type="text" class="form-control" name="phone">
+                            </div>
 
-  <button type="submit">Enviar</button>
-</form>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Mensagem</label>
+                                <textarea class="form-control" name="message" rows="4" required></textarea>
+                            </div>
 
+                            <button type="submit" class="btn btn-vila w-100">
+                                Enviar Mensagem
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
