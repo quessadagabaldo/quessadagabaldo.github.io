@@ -1,6 +1,8 @@
-// VILAQG — landing page v4 (estilo igloo.inc)
-// 216 cubos de "gelo" que mudam de forma conforme a rolagem:
-// cubo → prédio → esfera de rede → painel de barras → cubo.
+// VILAQG — landing page v5 (estilo igloo.inc)
+// 216 cubos de "gelo" que mudam de forma conforme a rolagem.
+// Cada <section data-chapter> escolhe sua forma com data-shape:
+//   rack · predio · roteador · barras · segmentos · logo
+// A mesma forma pode aparecer em mais de um capítulo.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -87,7 +89,7 @@ function setActiveChapter(i, force = false) {
 }
 
 /* ═════════ Rolagem ═════════ */
-let scrollTarget = 0; // capítulo "contínuo": 0 → 4
+let scrollTarget = 0; // capítulo "contínuo": 0 → último capítulo
 function readScroll() {
   const max = document.documentElement.scrollHeight - innerHeight;
   const p = max > 0 ? clamp(scrollY / max) : 0;
@@ -157,7 +159,7 @@ if (renderer) {
   const scatter = Array.from({ length: N }, () => new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).normalize().multiplyScalar(0.8 + rng() * 1.6));
   const spinAxis = Array.from({ length: N }, () => new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).normalize());
 
-  /* ── As 5 formações ──
+  /* ── As 6 formações ──
      Cada cubo tem, por formação: posição, escala, giro no eixo Y e cor.
      Barras ainda têm base + altura, para "respirar" como dados ao vivo. */
   const F = [];
@@ -172,7 +174,6 @@ if (renderer) {
     return f;
   };
   const V = (x, y, z) => new THREE.Vector3(x, y, z);
-  const ONE = V(1, 1, 1);
   const TAU = Math.PI * 2;
 
   // 0 · rack de servidor
@@ -222,19 +223,22 @@ if (renderer) {
   // Número "aleatório" estável 0–1: janelas mudam de estado de tempos em tempos, sem piscar a cada frame
   const hash = (a, b) => { const x = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return x - Math.floor(x); };
 
-  // 1 · prédio: 8 andares com lajes, janelas, antena, câmeras nas quinas e praça com varredura
+  // 1 · prédio em camadas: 8 andares, e um pulso sobe pelo cabeamento vertical acendendo cada laje
   //   0–8     lajes (9)
   //   9–72    janelas: 8 andares × 8 (perímetro 3×3)
   //   73–79   antena (6) + luz vermelha no topo
   //   80–103  8 câmeras × 3 (suporte, corpo, lente)
   //   104–187 praça 10×10 sem o miolo 4×4
-  //   188–215 anel de monitoramento girando
+  //   188–215 prumada de cabeamento na fachada (28)
   const FLOOR_H = 0.62, BASE = -2.5;
+  const RISER_N = 28, RISER_Z = 1.14, RISER_H = 8 * FLOOR_H;
   const ring3 = [[-1, -1], [0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0]];
   const plaza = [];
   for (let x = 0; x < 10; x++) for (let z = 0; z < 10; z++) if (!(x >= 3 && x <= 6 && z >= 3 && z <= 6)) plaza.push([x, z]);
   const corners = [[1, 1], [-1, 1], [-1, -1], [1, -1]];
   const camSpots = Array.from({ length: 8 }, (_, k) => ({ corner: corners[k % 4], floor: 1 + ((k * 3) % 7) }));
+  // Altura do pulso que percorre a prumada (sai um pouco abaixo da base e passa do topo)
+  const pulseY = (time) => BASE - 0.4 + ((time * 0.2) % 1) * (RISER_H + 0.8);
   F.push(make((i) => {
     if (i < 9) return { p: V(0, BASE + i * FLOOR_H, 0), s: V(4.1, 0.14, 4.1), c: slate };
     if (i < 73) {
@@ -254,31 +258,32 @@ if (renderer) {
       const yaw = Math.atan2(-dir.z, dir.x); // eixo X do cubo apontando para fora da quina
       if (part === 0) return { p: wall, s: V(0.18, 0.18, 0.18), c: slate, yaw };
       if (part === 1) return { p: wall.clone().addScaledVector(dir, 0.22), s: V(0.6, 0.26, 0.26), c: ice, yaw };
-      return { p: wall.clone().addScaledVector(dir, 0.39), s: V(0.1, 0.16, 0.16), c: red, yaw };
+      return { p: wall.clone().addScaledVector(dir, 0.39), s: V(0.1, 0.16, 0.16), c: slate, yaw };
     }
     if (i < 188) {
       const [x, z] = plaza[i - 104];
       return { p: V((x - 4.5) * 0.55, BASE - 0.12, (z - 4.5) * 0.55), s: V(0.95, 0.12, 0.95), c: slate };
     }
-    const k = i - 188, a = (k / 28) * TAU;
-    return { p: V(Math.cos(a) * 2.3, BASE + 2.6, Math.sin(a) * 2.3), s: V(0.14, 0.14, 0.14), c: k % 4 === 0 ? red : ice };
+    const k = i - 188;
+    return { p: V(0, BASE + (k / (RISER_N - 1)) * RISER_H, RISER_Z), s: V(0.22, 0.36, 0.22), c: slate };
   }, null, (i, time, p, s, c) => {
-    if (i >= 9 && i < 73) {
+    const py = pulseY(time);
+    if (i < 9) {
+      // a laje acende quando o pulso passa por ela: uma camada de cada vez
+      const glow = clamp(1 - Math.abs(p.y - py) / 0.4);
+      c.lerp(red, glow);
+      s.y *= 1 + glow * 0.8;
+    } else if (i < 73) {
       // janelas acendendo e apagando
       const k = i - 9, r = hash(k, Math.floor(time * 0.4 + k * 0.13));
       c.copy(r > 0.93 ? red : r > 0.45 ? ice : slate);
     } else if (i === 79) {
       s.setScalar(Math.sin(time * 4) > 0 ? 0.2 : 0.08); // luz da antena
-    } else if (i >= 80 && i < 104 && (i - 80) % 3 === 2) {
-      s.setScalar(Math.sin(time * 3 + i) > 0.3 ? 0.18 : 0.1); // lente gravando
-    } else if (i >= 104 && i < 188) {
-      // onda de varredura saindo do prédio
-      const w = Math.max(0, Math.sin(Math.hypot(p.x, p.z) * 2.2 - time * 2.4));
-      p.y += w ** 6 * 0.35;
-      if (w > 0.97) c.copy(red);
     } else if (i >= 188) {
-      const k = i - 188, a = (k / 28) * TAU + time * 0.35;
-      p.set(Math.cos(a) * 2.3, BASE + 2.6 + Math.sin(a * 2 + time) * 0.25, Math.sin(a) * 2.3);
+      // prumada: o trecho por onde o pulso passa fica vermelho
+      const glow = clamp(1 - Math.abs(p.y - py) / 0.35);
+      c.lerp(red, glow);
+      s.x = s.z = 0.22 + glow * 0.12;
     }
   }));
 
@@ -403,9 +408,104 @@ if (renderer) {
     });
   })());
 
-  // Câmera e enquadramento por capítulo
-  const CAM_DIST = [10.5, 13, 11, 12, 10];
-  const TILT = [0.22, 0.18, 0.45, 0.6, 0.04];
+  // 5 · segmentos: condomínio, escritório e comércio lado a lado, atendidos pela mesma equipe
+  //   0–31    condomínio: torre 2×2 × 8 andares
+  //   32      cobertura da torre
+  //   33–64   escritório: 4×2 × 4 andares, fachada de vidro
+  //   65      cobertura do escritório
+  //   66–77   comércio: 3×2 × 2 andares, vitrine no térreo
+  //   78–80   toldo vermelho
+  //   81      cobertura do comércio
+  //   82–161  calçada 16×5
+  //   162–190 cabo de rede ligando os três pela frente
+  //   191     nó central (a equipe)
+  //   192–215 3 fluxos × 8 pulsos entre o nó e cada prédio
+  const SB = -1.9, SS = 0.45, SW = 0.84;
+  const glass = new THREE.Color(0x92afd7);
+  const lvlY = (lv) => SB + 0.21 + lv * SS;          // centro de um andar
+  const roofY = (levels) => lvlY(levels - 1) + 0.25; // centro da cobertura
+  const SITES = [
+    { x: -2.1, top: roofY(8) + 0.05 },
+    { x: 0, top: roofY(4) + 0.05 },
+    { x: 2.1, top: roofY(2) + 0.05 },
+  ];
+  const NODE = V(0, SB + 4.1, 0);
+  const CABLE_N = 29, CABLE_Z = 0.62;
+  // Posição de um pulso no caminho nó → prédio (u de 0 a 1), em arco
+  const flow = (b, u, out) => {
+    const site = SITES[b];
+    out.set(lerp(NODE.x, site.x, u), lerp(NODE.y, site.top, u), 0);
+    out.y += Math.sin(u * Math.PI) * 0.45;
+    out.z += Math.sin(u * Math.PI) * 0.3;
+    return out;
+  };
+  F.push(make((i) => {
+    if (i < 32) {
+      const lv = (i / 4) | 0, k = i % 4;
+      return { p: V(-2.1 + ((k % 2) - 0.5) * SS, lvlY(lv), (((k / 2) | 0) - 0.5) * SS), s: V(SW, SW, SW), c: ice };
+    }
+    if (i === 32) return { p: V(-2.1, roofY(8), 0), s: V(2.1, 0.14, 2.1), c: slate };
+    if (i < 65) {
+      const k = i - 33, lv = (k / 8) | 0, m = k % 8;
+      return { p: V(((m % 4) - 1.5) * SS, lvlY(lv), (((m / 4) | 0) - 0.5) * SS), s: V(SW, SW * 0.94, SW), c: glass };
+    }
+    if (i === 65) return { p: V(0, roofY(4), 0), s: V(4.1, 0.14, 2.1), c: slate };
+    if (i < 78) {
+      const k = i - 66, lv = (k / 6) | 0, m = k % 6;
+      return { p: V(2.1 + ((m % 3) - 1) * SS, lvlY(lv), (((m / 3) | 0) - 0.5) * SS), s: V(SW, SW, SW), c: lv === 0 ? glass : ice };
+    }
+    if (i < 81) {
+      const k = i - 78;
+      return { p: V(2.1 + (k - 1) * SS, lvlY(0) + 0.27, 0.64), s: V(0.9, 0.1, 0.8), c: red };
+    }
+    if (i === 81) return { p: V(2.1, roofY(2), 0), s: V(3.2, 0.14, 2.1), c: slate };
+    if (i < 162) {
+      const k = i - 82, x = k % 16, z = (k / 16) | 0;
+      return { p: V((x - 7.5) * 0.38, SB - 0.035, (z - 2) * 0.38), s: V(0.7, 0.12, 0.7), c: slate };
+    }
+    if (i < 191) {
+      const k = i - 162;
+      return { p: V(-2.1 + k * (4.2 / (CABLE_N - 1)), SB + 0.05, CABLE_Z), s: V(0.16, 0.16, 0.16), c: slate };
+    }
+    if (i === 191) return { p: NODE.clone(), s: V(0.5, 0.5, 0.5), c: red };
+    const k = i - 192, b = (k / 8) | 0, j = k % 8;
+    return { p: flow(b, (j + 0.5) / 8, V(0, 0, 0)), s: V(0.2, 0.2, 0.2), c: j % 3 === 0 ? red : ice };
+  }, null, (i, time, p, s, c) => {
+    if (i < 32) {
+      // apartamentos com luz acesa e apagada
+      const r = hash(i, Math.floor(time * 0.35 + i * 0.17));
+      c.copy(r > 0.94 ? red : r > 0.4 ? ice : slate);
+    } else if (i >= 33 && i < 65) {
+      // escritório: salas acendendo sobre o vidro
+      const r = hash(i, Math.floor(time * 0.3 + i * 0.11));
+      c.copy(r > 0.6 ? ice : glass);
+    } else if (i >= 162 && i < 191) {
+      // dados correndo do centro para as pontas do cabo
+      const w = Math.max(0, Math.sin(Math.abs(p.x) * 2.4 - time * 3));
+      s.setScalar(0.16 + w ** 6 * 0.14);
+      if (w > 0.9) c.copy(red);
+    } else if (i === 191) {
+      s.setScalar(0.5 + Math.sin(time * 3) * 0.08);
+    } else if (i >= 192) {
+      const k = i - 192, b = (k / 8) | 0, j = k % 8;
+      const u = (j / 8 + time * 0.28) % 1;
+      flow(b, u, p);
+      s.setScalar(0.06 + 0.16 * Math.sin(u * Math.PI));
+    }
+  }));
+
+  /* ── Qual forma cada capítulo mostra ── */
+  const SHAPE = { rack: 0, predio: 1, roteador: 2, barras: 3, logo: 4, segmentos: 5 };
+  // Sem data-shape, o capítulo usa a forma da sua posição
+  const seq = chapters.map((c, k) => SHAPE[c.dataset.shape] ?? Math.min(k, F.length - 1));
+  const LOGO_AT = seq.lastIndexOf(SHAPE.logo);
+  // Peso (0–1) de uma forma na posição atual da rolagem
+  const near = (shape, pos, spread) =>
+    seq.reduce((m, s, k) => (s === shape ? Math.max(m, clamp(1 - Math.abs(pos - k) * spread)) : m), 0);
+
+  // Câmera e enquadramento por forma (mesma ordem de SHAPE)
+  const CAM_DIST = [10.5, 13, 11, 12, 10, 12];
+  const TILT = [0.22, 0.18, 0.45, 0.6, 0.04, 0.3];
 
   // Resolve posição/escala/giro/cor de um cubo numa formação, já com o "ao vivo"
   const sample = (f, i, time, outP, outS, outC) => {
@@ -492,12 +592,13 @@ if (renderer) {
 
     // Inércia: a cena "persegue" a rolagem, o que dá o movimento suave
     t += (scrollTarget - t) * (reduce ? 1 : 1 - Math.pow(0.001, dt));
-    const last = F.length - 1;
+    const last = seq.length - 1;
     const i0 = Math.min(Math.floor(t), last - 1);
     const f = clamp(t - i0);
     const e = smooth(0.12, 0.88, f);          // segura a forma parada no começo e no fim do trecho
     const burst = Math.sin(Math.PI * e);      // 0 → 1 → 0 no meio da transição
-    const A = F[i0], B = F[i0 + 1];
+    const shA = seq[i0], shB = seq[i0 + 1];
+    const A = F[shA], B = F[shB];
 
     for (let i = 0; i < N; i++) {
       const yawA = sample(A, i, time, pA, sA, cA);
@@ -518,8 +619,8 @@ if (renderer) {
     cubes.instanceMatrix.needsUpdate = true;
     cubes.instanceColor.needsUpdate = true;
 
-    // Linhas de sinal acompanham os cubos e aparecem só perto do capítulo 2
-    const netW = clamp(1 - Math.abs(t - 2) * 1.6);
+    // Linhas de sinal acompanham os cubos e aparecem só perto do roteador
+    const netW = near(SHAPE.roteador, t, 1.6);
     lineMat.opacity = netW * 0.35;
     if (netW > 0) {
       edgeIdx.forEach(([a, b], k) => {
@@ -528,19 +629,19 @@ if (renderer) {
       lineGeo.attributes.position.needsUpdate = true;
     }
 
-    // Brilho vermelho pulsando dentro do rack
-    const coreW = clamp(1 - t * 1.4);
+    // Brilho vermelho pulsando dentro do rack (em qualquer capítulo que mostre o rack)
+    const coreW = near(SHAPE.rack, t, 1.4);
     const pulse = reduce ? 1 : 1 + Math.sin(time * 2.2) * 0.15;
     coreLight.intensity = 3 + coreW * 20 * pulse;
 
     // Enquadramento: objeto à direita no desktop, em cima no celular
     const k = clamp(t - i0);
-    let dist = lerp(CAM_DIST[i0], CAM_DIST[i0 + 1], smooth(0, 1, k)) * (portrait ? 1.5 : 1);
-    const tilt = lerp(TILT[i0], TILT[i0 + 1], smooth(0, 1, k));
+    let dist = lerp(CAM_DIST[shA], CAM_DIST[shB], smooth(0, 1, k)) * (portrait ? 1.5 : 1);
+    const tilt = lerp(TILT[shA], TILT[shB], smooth(0, 1, k));
     mouseSmooth.lerp(mouse, 1 - Math.pow(0.02, dt));
-    // Na logo (capítulo 4) a cena para de girar e fica de frente, e a câmera se afasta o
+    // Na logo (último capítulo) a cena para de girar e fica de frente, e a câmera se afasta o
     // suficiente para a palavra caber: ~86% da largura no celular, ~40% no desktop (lado direito).
-    const wL = smooth(3.3, 3.95, t);
+    const wL = LOGO_AT < 0 ? 0 : smooth(LOGO_AT - 0.7, LOGO_AT - 0.05, t);
     const perUnit = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)); // altura visível por unidade de distância
     const fit = LOGO_W / ((portrait ? 0.86 : 0.4) * perUnit * camera.aspect);
     dist = lerp(dist, Math.max(fit, portrait ? 12 : 9), wL);

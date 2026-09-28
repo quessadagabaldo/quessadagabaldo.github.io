@@ -3,13 +3,59 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>VílaAQG · Gestão de Tecnologia</title>
-  <meta name="description" content="Redes, servidores, backup, CFTV e suporte de TI para condomínios, escritórios e empresas em Curitiba. A VílaQG instala, integra e mantém tudo com uma equipe só.">
+  <title>VílaQG · Infraestrutura de TI em Curitiba</title>
+  <meta name="description" content="Redes, servidores, backup, segurança eletrônica e suporte de TI para condomínios, escritórios e empresas em Curitiba. A VílaQG projeta, instala e mantém tudo com uma equipe só.">
   <meta name="theme-color" content="#0d0f13">
-  <link rel="icon" type="image/png" href="assets/LogoVilaQG.png">
+  <link rel="canonical" href="https://vilaqg.com.br/">
+
+  <!-- Prévia ao compartilhar o link (WhatsApp, LinkedIn etc.) -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:site_name" content="VílaQG">
+  <meta property="og:url" content="https://vilaqg.com.br/">
+  <meta property="og:title" content="VílaQG · Infraestrutura de TI">
+  <meta property="og:description" content="Redes, servidores, segurança eletrônica e suporte para condomínios e empresas em Curitiba.">
+  <meta property="og:image" content="https://vilaqg.com.br/assets/og-vilaqg.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Lista de segmentos (capítulo "Para quem"). Pode mover para o styles.css. -->
+  <style>
+    .segments { list-style: none; margin: 1.75rem 0 0; padding: 0; display: grid; gap: 1rem; max-width: 34rem; }
+    .segments li { line-height: 1.45; font-size: 0.95rem; }
+    .segments b { display: block; margin-bottom: 0.15rem; color: #e84545; font-weight: 600; }
+    .segments span { opacity: 0.78; }
+    @media (max-width: 600px) {
+      .segments { gap: 0.7rem; margin-top: 1.25rem; }
+      .segments li { font-size: 0.88rem; }
+    }
+  </style>
+
+  <!-- Dados estruturados para o Google (empresa local) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "name": "VílaQG",
+    "legalName": "Quessada Gabaldo Ltda.",
+    "taxID": "52.963.997/0001-89",
+    "url": "https://vilaqg.com.br/",
+    "image": "https://vilaqg.com.br/assets/og-vilaqg.png",
+    "email": "contato@vilaqg.com.br",
+    "telephone": "+55-41-3797-0555",
+    "description": "Infraestrutura de TI, redes, servidores, backup, segurança eletrônica e suporte para condomínios, escritórios e empresas.",
+    "address": { "@type": "PostalAddress", "addressLocality": "Curitiba", "addressRegion": "PR", "addressCountry": "BR" },
+    "areaServed": "Curitiba e região metropolitana"
+  }
+  </script>
+
   <script type="importmap">
     {
       "imports": {
@@ -34,79 +80,113 @@
 
   <!-- HUD nos cantos -->
   <div class="hud">
-    <a class="hud-logo" href="#topo"><img src="assets/logo-white.png" alt="VILAQG"></a>
+    <a class="hud-logo" href="#topo"><img src="assets/logo-white.png" alt="VílaQG"></a>
     <a class="hud-link" id="hud-contato" href="#contato"><span data-scramble>Fale com a gente</span> ↗</a>
     <div class="hud-chapter" aria-hidden="true"><span data-hud-index>00</span><i></i><span data-hud-label>Início</span></div>
     <div class="hud-progress" aria-hidden="true"><span data-hud-pct>000</span></div>
   </div>
 
+  <!--
+    Cada capítulo escolhe a forma 3D com data-shape:
+    rack · predio · roteador · barras · segmentos · logo
+    A ordem das seções é o que vale; o número em data-chapter é só organização.
+  -->
   <main id="topo">
 
-    <section class="chapter chapter-hero" data-chapter="0" data-label="Início">
+    <section class="chapter chapter-hero" data-chapter="0" data-label="Início" data-shape="rack">
       <div class="chapter-inner">
-        <p class="kicker" data-scramble>Gestão de tecnologia</p>
+        <p class="kicker" data-scramble>Infraestrutura e gestão de TI</p>
         <h1 class="title">
           <span class="line"><span>Tecnologia que</span></span>
           <span class="line"><span>trabalha</span></span>
           <span class="line red"><span>por você.</span></span>
         </h1>
-        <p class="lead">Redes, servidores, câmeras e suporte: projetados, instalados e mantidos por uma equipe só, para condomínios e empresas.</p>
+        <p class="lead">Redes, servidores, segurança eletrônica e suporte: projetados, instalados e mantidos por uma equipe só, para condomínios e empresas.</p>
       </div>
     </section>
 
-    <section class="chapter" data-chapter="1" data-label="Infraestrutura">
+    <section class="chapter" data-chapter="1" data-label="Infraestrutura" data-shape="predio">
       <div class="chapter-inner">
-        <p class="kicker"><b>01</b> <span data-scramble>Segurança</span></p>
+        <p class="kicker"><b>01</b> <span data-scramble>Infraestrutura</span></p>
         <h2 class="title">
           <span class="line"><span>Cada camada,</span></span>
           <span class="line red"><span>bem construída.</span></span>
         </h2>
-        <p class="lead">A base física, a rede, os servidores e os sistemas de segurança pensados como um conjunto só, e não como fornecedores separados.</p>
-        <p class="tags">Cabeamento · Rede · Servidores · CFTV · Controle de acesso · Backup</p>
+        <p class="lead">Do cabeamento à rede, dos servidores à segurança eletrônica: cada andar da sua tecnologia projetado como um conjunto só, sem depender de vários fornecedores.</p>
+        <p class="tags">Cabeamento estruturado · Racks e energia · CFTV · Controle de acesso · Integração</p>
       </div>
     </section>
 
-    <section class="chapter" data-chapter="2" data-label="Redes">
+    <section class="chapter" data-chapter="2" data-label="Redes" data-shape="roteador">
       <div class="chapter-inner">
         <p class="kicker"><b>02</b> <span data-scramble>Redes</span></p>
         <h2 class="title">
           <span class="line"><span>Conexão que</span></span>
           <span class="line red"><span>não cai.</span></span>
         </h2>
-        <p class="lead">Cabeamento estruturado, Wi-Fi de alto desempenho, redes segmentadas e links redundantes, do escritório de dez pessoas ao condomínio de vários blocos.</p>
-        <p class="tags">Cabeamento · Wi-Fi · Segmentação · Links</p>
+        <p class="lead">Wi-Fi de alto desempenho, redes segmentadas e links redundantes, do escritório de dez pessoas ao condomínio de vários blocos.</p>
+        <p class="tags">Wi-Fi · Switches · Segmentação · Firewall · Links redundantes</p>
       </div>
     </section>
 
-    <section class="chapter" data-chapter="3" data-label="Servidores e Dados">
+    <section class="chapter" data-chapter="3" data-label="Servidores e Dados" data-shape="rack">
       <div class="chapter-inner">
         <p class="kicker"><b>03</b> <span data-scramble>Servidores e Dados</span></p>
         <h2 class="title">
           <span class="line"><span>Seus dados, sob</span></span>
           <span class="line red"><span>seu controle.</span></span>
         </h2>
-        <p class="lead">Servidores, NAS e backup redundante, configurados e adequados à LGPD. Ideal para quem não pode perder nem expor informação.</p>
-        <p class="tags">TrueNAS · Backup · Microsoft 365 · Google Workspace · LGPD</p>
+        <p class="lead">Servidores, NAS e backup redundante, com Microsoft 365 e Google Workspace configurados e alinhados à LGPD. Para quem não pode perder nem expor informação.</p>
+        <p class="tags">Servidores · NAS · Backup · Microsoft 365 · Google Workspace · LGPD</p>
       </div>
     </section>
 
-    <section class="chapter chapter-contact" id="contato" data-chapter="4" data-label="Contato">
+    <section class="chapter" data-chapter="4" data-label="Suporte e Gestão" data-shape="barras">
       <div class="chapter-inner">
-        <p class="kicker"><b>04</b> <span data-scramble>Contato</span></p>
+        <p class="kicker"><b>04</b> <span data-scramble>Suporte e Gestão</span></p>
+        <h2 class="title">
+          <span class="line"><span>Alguém que</span></span>
+          <span class="line red"><span>responde.</span></span>
+        </h2>
+        <p class="lead">Monitoramento da infraestrutura, manutenção dos equipamentos, gestão de usuários e visitas técnicas recorrentes, com relatório mensal. Um contrato, um responsável.</p>
+        <p class="tags">Suporte técnico · Monitoramento da rede · Gestão de usuários · Relatórios</p>
+      </div>
+    </section>
+
+    <section class="chapter" data-chapter="5" data-label="Para quem" data-shape="segmentos">
+      <div class="chapter-inner">
+        <p class="kicker"><b>05</b> <span data-scramble>Para quem</span></p>
+        <h2 class="title">
+          <span class="line"><span>Cada operação</span></span>
+          <span class="line red"><span>tem seu jeito.</span></span>
+        </h2>
+        <ul class="segments">
+          <li><b>Condomínios</b><span>Rede, câmeras e controle de acesso nas áreas comuns, com gestão contínua para o síndico.</span></li>
+          <li><b>Escritórios e advocacia</b><span>Dados sensíveis protegidos, backup contra ransomware e LGPD em dia.</span></li>
+          <li><b>Clínicas e consultórios</b><span>Sistemas sempre no ar e informações de pacientes guardadas com segurança.</span></li>
+          <li><b>Empresas e comércios</b><span>Rede, câmeras, telefonia e suporte para o negócio não parar.</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="chapter chapter-contact" id="contato" data-chapter="6" data-label="Contato" data-shape="logo">
+      <div class="chapter-inner">
+        <p class="kicker"><b>06</b> <span data-scramble>Contato</span></p>
         <h2 class="title">
           <span class="line"><span>Vamos</span></span>
           <span class="line red"><span>conversar?</span></span>
         </h2>
+        <p class="lead">Conte o que a sua operação precisa. Respondemos com um diagnóstico inicial, sem compromisso. Atendemos Curitiba e região.</p>
         <div class="contact-links">
           <a class="contact-mail" href="mailto:contato@vilaqg.com.br">contato@vilaqg.com.br ↗</a>
-          <!-- WhatsApp: fica escondido até WHATSAPP ser preenchido no script lá embaixo -->
+          <!-- WhatsApp: fica escondido se WHATSAPP estiver vazio no script lá embaixo -->
           <a class="contact-mail" id="whatsapp-link" href="#" target="_blank" rel="noopener" hidden>WhatsApp ↗</a>
         </div>
       </div>
       <!-- TODO(Gui): revisar o texto da parceria -->
       <footer class="site-footer">
-        <span>VílaQG & Bodnar</span>
-        <span>© <span id="ano">2026</span></span>
+        <span>VílaQG & Bodnar · Curitiba, PR</span>
+        <span>CNPJ 52.963.997/0001-89 · © <span id="ano">2026</span></span>
       </footer>
     </section>
 
@@ -114,7 +194,7 @@
 
   <script type="module" src="app.js"></script>
   <script>
-    // Preencha quando o chip chegar. Só números, com DDI + DDD. Ex: '554137970555'
+    // Só números, com DDI + DDD. Ex: '554137970555'. Vazio esconde o botão.
     const WHATSAPP = '554137970555';
 
     if (WHATSAPP) {
