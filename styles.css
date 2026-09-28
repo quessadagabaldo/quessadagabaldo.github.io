@@ -1,0 +1,173 @@
+/* VILAQG — landing page v4 (estilo igloo.inc)
+   Cena 3D fixa atrás; o texto rola por cima em capítulos de uma tela cada.
+   HUD em fonte mono nos cantos. Mobile primeiro; desktop em @media (min-width: 960px). */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  --red: #e84545;
+  --ice: #e9edf2;
+  --ice-dim: #99a1b0;
+  --ice-faint: #6a7180;
+  --bg: #0d0f13;
+
+  --font-display: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --gutter: 20px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+html.is-loading { overflow: hidden; }
+body {
+  margin: 0;
+  font-family: var(--font-body); line-height: 1.5;
+  color: var(--ice);
+  background: radial-gradient(120% 80% at 60% 35%, #1c212b 0%, #12151b 45%, var(--bg) 80%) fixed;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+h1, h2, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+img { display: block; }
+[hidden] { display: none !important; }
+::selection { background: var(--red); color: #fff; }
+:focus-visible { outline: 1px solid var(--red); outline-offset: 4px; }
+
+/* ═════════ Carregador ASCII ═════════ */
+.loader {
+  position: fixed; inset: 0; z-index: 100;
+  display: grid; place-content: center; justify-items: center; gap: 14px;
+  background: var(--bg);
+  font-family: var(--font-mono); font-size: 0.8125rem; letter-spacing: 0.08em;
+  color: var(--ice);
+  transition: opacity 900ms ease, visibility 0s 900ms;
+}
+.loader-pct { color: var(--ice-faint); font-size: 0.6875rem; }
+html.is-loaded .loader { opacity: 0; visibility: hidden; }
+
+/* ═════════ Cena ═════════ */
+.webgl { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+/* Escurece a parte de baixo no celular, onde fica o texto */
+.vignette {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(to top, rgba(13,15,19,0.92) 0%, rgba(13,15,19,0.55) 38%, transparent 62%);
+}
+
+/* ═════════ HUD ═════════ */
+.hud {
+  position: fixed; inset: 0; z-index: 10; pointer-events: none;
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ice-dim);
+}
+.hud > * { position: absolute; }
+.hud a { pointer-events: auto; }
+.hud-logo { top: 22px; left: var(--gutter); }
+.hud-logo img { height: 16px; width: auto; }
+.hud-link { top: 22px; right: var(--gutter); color: var(--ice); transition: color 200ms; }
+.hud-link:hover { color: var(--red); }
+.hud-chapter { bottom: 20px; left: var(--gutter); display: flex; align-items: center; gap: 10px; }
+.hud-chapter [data-hud-index] { color: var(--red); }
+.hud-chapter i { width: 24px; height: 1px; background: var(--ice-faint); }
+.hud-progress { bottom: 20px; right: var(--gutter); }
+
+/* Entrada do HUD depois do carregador */
+.js .hud > * { opacity: 0; transition: opacity 800ms ease 400ms; }
+html.is-loaded .hud > * { opacity: 1; }
+
+/* ═════════ Capítulos ═════════ */
+main { position: relative; z-index: 2; }
+.chapter {
+  position: relative;
+  min-height: 100vh; min-height: 100svh;
+  display: flex; align-items: flex-end;
+  padding: 0 var(--gutter) max(13svh, 88px);
+}
+.chapter-inner { max-width: 560px; }
+
+.kicker {
+  display: flex; gap: 10px; align-items: center;
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ice-dim);
+}
+.kicker b { color: var(--red); font-weight: 500; }
+.kicker::before { content: ''; width: 18px; height: 1px; background: var(--red); }
+
+.title {
+  margin-top: 18px;
+  font-family: var(--font-display); font-weight: 700;
+  text-transform: uppercase; letter-spacing: -0.03em; line-height: 0.92;
+  font-size: clamp(2.5rem, 11vw, 6.2rem);
+  color: var(--ice);
+}
+.title .line { display: block; overflow: hidden; padding-bottom: 0.05em; margin-bottom: -0.05em; }
+.title .line > span { display: inline-block; }
+.title .red > span { color: var(--red); }
+.lead { margin-top: 20px; max-width: 420px; font-size: 1rem; color: var(--ice-dim); }
+.lead em { font-style: normal; color: var(--ice); border-bottom: 1px solid var(--red); }
+.tags { margin-top: 18px; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ice-faint); }
+
+/* Texto entra quando o capítulo fica ativo e sai quando deixa de ser (nos dois sentidos) */
+.js .chapter .kicker,
+.js .chapter .lead,
+.js .chapter .tags,
+.js .chapter .contact-links {
+  opacity: 0; transform: translateY(14px);
+  transition: opacity 700ms ease, transform 900ms var(--ease-out);
+}
+.js .chapter .title .line > span {
+  transform: translateY(105%);
+  transition: transform 1s var(--ease-out);
+}
+.js .chapter .title .line:nth-child(2) > span { transition-delay: 70ms; }
+.js .chapter .title .line:nth-child(3) > span { transition-delay: 140ms; }
+.js .chapter.is-active .kicker,
+.js .chapter.is-active .lead,
+.js .chapter.is-active .tags,
+.js .chapter.is-active .contact-links { opacity: 1; transform: none; }
+.js .chapter.is-active .lead { transition-delay: 250ms; }
+.js .chapter.is-active .tags,
+.js .chapter.is-active .contact-links { transition-delay: 350ms; }
+.js .chapter.is-active .title .line > span { transform: none; }
+
+/* ═════════ Contato ═════════ */
+.contact-links { margin-top: 32px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+.contact-mail {
+  font-family: var(--font-display); font-weight: 500;
+  font-size: clamp(1.15rem, 5.4vw, 2rem);
+  padding-bottom: 6px; border-bottom: 1px solid rgba(233,237,242,0.25);
+  transition: border-color 250ms, color 250ms;
+}
+.contact-mail:hover { border-color: var(--red); color: #fff; }
+.chapter-contact { padding-bottom: max(18svh, 120px); }
+.site-footer {
+  position: absolute; left: var(--gutter); right: var(--gutter); bottom: 56px;
+  display: flex; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--ice-faint);
+}
+
+/* Sem WebGL: a página continua legível só com o fundo */
+.no-webgl .webgl { display: none; }
+
+/* ═════════ Desktop ═════════ */
+@media (min-width: 960px) {
+  :root { --gutter: 40px; }
+  .hud-logo, .hud-link { top: 30px; }
+  .hud-logo img { height: 18px; }
+  .hud-chapter, .hud-progress { bottom: 30px; }
+
+  .vignette { background: linear-gradient(to right, rgba(13,15,19,0.75) 0%, rgba(13,15,19,0.3) 40%, transparent 60%); }
+  .chapter { align-items: center; padding: 0 var(--gutter); }
+  .chapter-inner { padding-left: 4vw; max-width: 48vw; }
+  .title { font-size: clamp(3.6rem, 6.2vw, 6.6rem); }
+  .lead { font-size: 1.0625rem; }
+  .site-footer { bottom: 30px; left: 50%; right: auto; transform: translateX(-50%); gap: 40px; }
+}
+
+/* ═════════ Menos movimento ═════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
