@@ -1,7 +1,7 @@
-// VILAQG — landing page v5 (estilo igloo.inc)
+// VILAQG — landing page v7 (estilo igloo.inc)
 // 216 cubos de "gelo" que mudam de forma conforme a rolagem.
 // Cada <section data-chapter> escolhe sua forma com data-shape:
-//   rack · predio · roteador · barras · segmentos · logo
+//   cubo · rack · predio · roteador · nas · barras · segmentos · logo
 // A mesma forma pode aparecer em mais de um capítulo.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -159,7 +159,7 @@ if (renderer) {
   const scatter = Array.from({ length: N }, () => new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).normalize().multiplyScalar(0.8 + rng() * 1.6));
   const spinAxis = Array.from({ length: N }, () => new THREE.Vector3(rng() - 0.5, rng() - 0.5, rng() - 0.5).normalize());
 
-  /* ── As 6 formações ──
+  /* ── As 8 formações ──
      Cada cubo tem, por formação: posição, escala, giro no eixo Y e cor.
      Barras ainda têm base + altura, para "respirar" como dados ao vivo. */
   const F = [];
@@ -494,8 +494,88 @@ if (renderer) {
     }
   }));
 
+  // 6 · NAS com cadeado: servidor de arquivos local copiando o backup para uma segunda unidade
+  //   0–19    NAS principal: 12 peças de gabinete, 4 discos, 4 LEDs
+  //   20–39   NAS de backup (mesma estrutura, menor)
+  //   40–45   cadeado: corpo 3×2
+  //   46–57   cadeado: haste (4 nas pernas + 8 no arco)
+  //   58–105  fluxo de backup: 48 blocos de dados indo de um NAS para o outro
+  //   106–215 base 11×10
+  const NAS_A = { x: -1.2, y: 0, k: 1 }, NAS_B = { x: 1.9, y: -0.19, k: 0.75 };
+  const nasPart = (n, j) => {
+    const { x, y, k } = n;
+    if (j < 12) {
+      const g = (j / 3) | 0, m = j % 3;
+      if (g < 2) return { p: V(x + (m - 1) * 0.68 * k, y + (g ? -0.72 : 0.72) * k, 0), s: V(1.4 * k, 0.18 * k, 3.3 * k), c: slate };
+      return { p: V(x + (g === 2 ? -1 : 1) * k, y + (m - 1) * 0.5 * k, 0), s: V(0.18 * k, 1.0 * k, 3.3 * k), c: slate };
+    }
+    if (j < 16) return { p: V(x + (j - 12 - 1.5) * 0.46 * k, y, 0.05 * k), s: V(0.8 * k, 2.4 * k, 2.8 * k), c: ice };
+    return { p: V(x + (j - 16 - 1.5) * 0.46 * k, y + 0.45 * k, 0.8 * k), s: V(0.12, 0.12, 0.12), c: green };
+  };
+  const LOCK = V(NAS_A.x, 1.35, 0.1), LOCK_TOP = LOCK.y + 0.46, ARC_R = 0.4;
+  const S0 = V(-0.25, 0.55, 0), S1 = V(NAS_B.x, 0.45, 0);
+  const stream = (u, out) => out.set(
+    lerp(S0.x, S1.x, u),
+    lerp(S0.y, S1.y, u) + Math.sin(u * Math.PI) * 0.9,
+    Math.sin(u * TAU) * 0.15,
+  );
+  F.push(make((i) => {
+    if (i < 20) return nasPart(NAS_A, i);
+    if (i < 40) return nasPart(NAS_B, i - 20);
+    if (i < 46) {
+      const k = i - 40;
+      return { p: V(LOCK.x + ((k % 3) - 1) * 0.46, LOCK.y + (((k / 3) | 0) - 0.5) * 0.46, LOCK.z), s: V(0.9, 0.9, 0.9), c: red };
+    }
+    if (i < 58) {
+      const k = i - 46;
+      if (k < 4) return { p: V(LOCK.x + (k < 2 ? -ARC_R : ARC_R), LOCK_TOP + 0.1 + (k % 2) * 0.2, LOCK.z), s: V(0.3, 0.44, 0.3), c: ice };
+      const a = ((k - 4) / 7) * Math.PI;
+      return { p: V(LOCK.x + Math.cos(a) * ARC_R, LOCK_TOP + 0.4 + Math.sin(a) * ARC_R, LOCK.z), s: V(0.3, 0.3, 0.3), c: ice };
+    }
+    if (i < 106) {
+      const j = i - 58;
+      return { p: stream((j + 0.5) / 48, V(0, 0, 0)), s: V(0.2, 0.2, 0.2), c: j % 6 === 0 ? red : ice };
+    }
+    const k = i - 106, x = k % 11, z = (k / 11) | 0;
+    return { p: V(0.35 + (x - 5) * 0.46, -0.83, (z - 4.5) * 0.46), s: V(0.84, 0.12, 0.84), c: slate };
+  }, null, (i, time, p, s, c) => {
+    if ((i >= 16 && i < 20) || (i >= 36 && i < 40)) {
+      s.setScalar(Math.sin(time * (5 + (i % 4)) + i * 2.3) > 0 ? 0.12 : 0.05); // atividade dos discos
+    } else if (i >= 46 && i < 58) {
+      p.y += Math.max(0, Math.sin(time * 0.7)) ** 10 * 0.22; // o cadeado abre e fecha de vez em quando
+    } else if (i >= 58 && i < 106) {
+      const u = ((i - 58) / 48 + time * 0.12) % 1;
+      stream(u, p);
+      s.setScalar(0.2 * (0.4 + 0.6 * Math.sin(u * Math.PI)));
+    } else if (i >= 106) {
+      // faixa clara atravessa a base, do NAS principal para o de backup
+      const w = Math.max(0, Math.sin(p.x * 1.6 - time * 1.8));
+      c.lerp(ice, w ** 8 * 0.6);
+    }
+  }));
+
+  // 7 · cubo 6×6×6 que trabalha sozinho: uma camada gira de cada vez, sem parar
+  //   i = x + z·6 + camada·36
+  const CUBE_G = 0.6, LAYER_T = 1.2, TURN_T = 0.85, QUARTER = Math.PI / 2;
+  const layerAngle = (L, time) => {
+    const period = 6 * LAYER_T, local = time - L * LAYER_T;
+    const n = Math.floor(local / period), phase = local - n * period;
+    return (n + smooth(0, TURN_T, phase)) * QUARTER * (L % 2 ? -1 : 1);
+  };
+  F.push(make((i) => {
+    const x = i % 6, z = ((i / 6) | 0) % 6, L = (i / 36) | 0;
+    return { p: V((x - 2.5) * CUBE_G, (L - 2.5) * CUBE_G, (z - 2.5) * CUBE_G), s: V(1.02, 1.02, 1.02) };
+  }, null, (i, time, p) => {
+    const a = layerAngle((i / 36) | 0, time);
+    const ca = Math.cos(a), sa = Math.sin(a), x = p.x, z = p.z;
+    p.x = x * ca + z * sa;
+    p.z = -x * sa + z * ca;
+    // o cubo é igual a cada 90°: devolve o giro perto de zero para não "pular" nas transições
+    return a - Math.round(a / QUARTER) * QUARTER;
+  }));
+
   /* ── Qual forma cada capítulo mostra ── */
-  const SHAPE = { rack: 0, predio: 1, roteador: 2, barras: 3, logo: 4, segmentos: 5 };
+  const SHAPE = { rack: 0, predio: 1, roteador: 2, barras: 3, logo: 4, segmentos: 5, nas: 6, cubo: 7 };
   // Sem data-shape, o capítulo usa a forma da sua posição
   const seq = chapters.map((c, k) => SHAPE[c.dataset.shape] ?? Math.min(k, F.length - 1));
   const LOGO_AT = seq.lastIndexOf(SHAPE.logo);
@@ -504,8 +584,8 @@ if (renderer) {
     seq.reduce((m, s, k) => (s === shape ? Math.max(m, clamp(1 - Math.abs(pos - k) * spread)) : m), 0);
 
   // Câmera e enquadramento por forma (mesma ordem de SHAPE)
-  const CAM_DIST = [10.5, 13, 11, 12, 10, 12];
-  const TILT = [0.22, 0.18, 0.45, 0.6, 0.04, 0.3];
+  const CAM_DIST = [10.5, 13, 11, 12, 10, 12, 10.5, 11];
+  const TILT = [0.22, 0.18, 0.45, 0.6, 0.04, 0.3, 0.28, 0.42];
 
   // Resolve posição/escala/giro/cor de um cubo numa formação, já com o "ao vivo"
   const sample = (f, i, time, outP, outS, outC) => {
@@ -517,8 +597,12 @@ if (renderer) {
       outP.y = f.base[i] + h / 2;
       outS.y = h / 0.5;
     }
-    if (f.anim && !reduce) f.anim(i, time, outP, outS, outC);
-    return f.yaw[i];
+    let yaw = f.yaw[i];
+    if (f.anim && !reduce) {
+      const r = f.anim(i, time, outP, outS, outC);
+      if (typeof r === 'number') yaw = r; // a animação pode girar o próprio cubo
+    }
+    return yaw;
   };
 
   /* ── Linhas de sinal (só aparecem no roteador) ── */
@@ -630,7 +714,7 @@ if (renderer) {
     }
 
     // Brilho vermelho pulsando dentro do rack (em qualquer capítulo que mostre o rack)
-    const coreW = near(SHAPE.rack, t, 1.4);
+    const coreW = Math.max(near(SHAPE.rack, t, 1.4), near(SHAPE.cubo, t, 1.4)); // brilho vermelho no miolo do rack e do cubo
     const pulse = reduce ? 1 : 1 + Math.sin(time * 2.2) * 0.15;
     coreLight.intensity = 3 + coreW * 20 * pulse;
 
